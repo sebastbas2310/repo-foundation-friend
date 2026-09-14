@@ -218,6 +218,25 @@ function RegisterPage() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="competitorType">Compete as</Label>
+                <Select value={competitorType} onValueChange={setCompetitorType}>
+                  <SelectTrigger id="competitorType">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NONE">I'm not competing</SelectItem>
+                    <SelectItem value="CAMEL">Camel</SelectItem>
+                    <SelectItem value="DWARF">Dwarf</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  We'll register you as a competitor with this email.
+                </p>
+              </div>
+
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
                 {submitting ? "Creating your account…" : "Create account"}
