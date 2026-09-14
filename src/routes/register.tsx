@@ -88,7 +88,13 @@ function RegisterPage() {
     setErrors({});
     setSubmitting(true);
     try {
-      const result = await signUp(parsed.data.email, parsed.data.password, parsed.data.fullName);
+      const result = await signUp(
+        parsed.data.email,
+        parsed.data.password,
+        parsed.data.fullName,
+        parsed.data.role,
+        parsed.data.competitorType === "NONE" ? null : parsed.data.competitorType,
+      );
       if (result.needsEmailConfirmation) {
         toast.success("Check your inbox and confirm your email, then sign in.");
         navigate({ to: "/login", replace: true });
