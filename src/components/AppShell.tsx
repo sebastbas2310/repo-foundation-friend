@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   ScrollText,
+  Settings,
   Trophy,
   Users,
   UsersRound,

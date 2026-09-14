@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuditLogsRouteImport } from './routes/audit-logs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as CompetitorsIndexRouteImport } from './routes/competitors.index'
 import { Route as CompetitorsIdRouteImport } from './routes/competitors.$id'
@@ -42,6 +43,11 @@ const LoginRoute = LoginRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StandingsRoute = StandingsRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/audit-logs': typeof AuditLogsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/competitors/$id': typeof CompetitorsIdRoute
   '/teams/$id': typeof TeamsIdRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/audit-logs': typeof AuditLogsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/competitors/$id': typeof CompetitorsIdRoute
   '/teams/$id': typeof TeamsIdRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/audit-logs': typeof AuditLogsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/competitors/$id': typeof CompetitorsIdRoute
   '/teams/$id': typeof TeamsIdRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/login'
     | '/register'
+    | '/settings'
     | '/standings'
     | '/competitors/$id'
     | '/teams/$id'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/login'
     | '/register'
+    | '/settings'
     | '/standings'
     | '/competitors/$id'
     | '/teams/$id'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/login'
     | '/register'
+    | '/settings'
     | '/standings'
     | '/competitors/$id'
     | '/teams/$id'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   AuditLogsRoute: typeof AuditLogsRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   CompetitorsIdRoute: typeof CompetitorsIdRoute
   TeamsIdRoute: typeof TeamsIdRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/standings': {
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuditLogsRoute: AuditLogsRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   CompetitorsIdRoute: CompetitorsIdRoute,
   TeamsIdRoute: TeamsIdRoute,
