@@ -132,10 +132,15 @@ export const api = {
   /** Reads the app profile for the signed-in Supabase identity. */
   myProfile: (token?: string | null) => apiRequest<ProfileResponse>("/users/me", { token }),
   users: {
-    list: () => apiRequest(`/users${PAGE_QUERY}`),
-    get: (id: number) => apiRequest(`/users/${id}`),
-    create: (body: unknown) => apiRequest("/users", { method: "POST", body }),
-    update: (id: number, body: unknown) => apiRequest(`/users/${id}`, { method: "PUT", body }),
+    list: () => apiRequest<unknown>(`/users${PAGE_QUERY}`),
+    get: (id: number) => apiRequest<ProfileResponse>(`/users/${id}`),
+    create: (body: unknown) => apiRequest<ProfileResponse>("/users", { method: "POST", body }),
+    update: (id: number, body: unknown) =>
+      apiRequest<ProfileResponse>(`/users/${id}`, { method: "PUT", body }),
+    /** Enables/disables a user (logical delete on the backend). */
+    setStatus: (id: number, enabled: boolean) =>
+      apiRequest<ProfileResponse>(`/users/${id}/status`, { method: "PATCH", body: { enabled } }),
+    remove: (id: number) => apiRequest<void>(`/users/${id}`, { method: "DELETE" }),
   },
   teams: {
     list: () => apiRequest(`/teams${PAGE_QUERY}`),
