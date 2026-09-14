@@ -52,6 +52,7 @@ const schema = z
     password: z.string().min(8, "Use at least 8 characters").max(128),
     confirm: z.string().min(1, "Repeat your password"),
     role: z.enum(["ADMINISTRATOR", "RACE_ORGANIZER", "VIEWER"]),
+    competitorType: z.enum(["NONE", "CAMEL", "DWARF", "MEDIUM", "OTHER"]),
   })
   .refine((data) => data.password === data.confirm, {
     path: ["confirm"],
