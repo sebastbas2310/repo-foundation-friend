@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/lib/auth";
 import { useStore } from "@/lib/store";
 import {
   COMPETITOR_STATUSES,
@@ -61,6 +62,7 @@ export function CompetitorFormDialog({
   competitor: Competitor | null;
 }) {
   const { competitors, saveCompetitor } = useStore();
+  const { user } = useAuth();
   const [form, setForm] = useState<typeof blank>(blank);
 
   useEffect(() => {
@@ -103,6 +105,9 @@ export function CompetitorFormDialog({
     }
     saveCompetitor({
       ...parsed.data,
+      // New competitors are registered under the signed-in user's email; edits
+      // keep whoever registered them originally.
+      registeredByEmail: competitor?.registeredByEmail ?? user?.username ?? undefined,
       ...(competitor ? { id: competitor.id, teamId: competitor.teamId ?? null } : { teamId: null }),
     });
     toast.success(competitor ? "Competitor updated." : "Competitor created.");
@@ -116,6 +121,13 @@ export function CompetitorFormDialog({
           <DialogTitle>{competitor ? "Edit competitor" : "New competitor"}</DialogTitle>
           <DialogDescription>
             Nicknames must be unique across the entire racing roster.
+            {competitor
+              ? competitor.registeredByEmail
+                ? ` Registered by ${competitor.registeredByEmail}.`
+                : ""
+              : user?.username
+                ? ` It will be registered under ${user.username}.`
+                : ""}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
