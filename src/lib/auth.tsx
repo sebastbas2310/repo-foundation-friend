@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { api, setUnauthorizedHandler } from "./api";
+import { api, ApiError, setUnauthorizedHandler, type ProfileResponse } from "./api";
 import { supabase } from "./supabase";
 import type { AuthUser, Role } from "./types";
 
@@ -40,7 +40,21 @@ async function buildUser(session: Session): Promise<{ user: AuthUser; offline: b
     role: "VIEWER",
   };
   try {
-    const profile = await api.myProfile(session.access_token);
+    let profile: ProfileResponse | undefined;
+    try {
+      profile = await api.myProfile(session.access_token);
+    } catch (error) {
+      // The backend answers 400/404 when this Supabase identity has no profile
+      // row yet — auto-provision it and read it back.
+      if (error instanceof ApiError && (error.status === 400 || error.status === 404)) {
+        await api
+          .createProfile(fallback.displayName, session.access_token)
+          .catch(() => undefined);
+        profile = await api.myProfile(session.access_token);
+      } else {
+        throw error;
+      }
+    }
     return {
       user: {
         username: profile.email ?? email,
