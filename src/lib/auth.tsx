@@ -19,7 +19,13 @@ interface AuthContextValue {
   /** True when the backend profile couldn't be reached, so the role fell back to VIEWER. */
   offline: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ needsEmailConfirmation: boolean }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    role?: Role,
+    competitorType?: string | null,
+  ) => Promise<{ needsEmailConfirmation: boolean }>;
   logout: () => Promise<void>;
   hasRole: (...roles: Role[]) => boolean;
   canManage: boolean;
