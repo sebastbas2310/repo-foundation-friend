@@ -70,7 +70,7 @@ export async function apiRequest<T>(
   const token = options.token ?? (await getAccessToken());
   let response: Response;
   // The hosted server sleeps between visits, so give up quickly instead of hanging.
-  const timeout = AbortSignal.timeout(options.timeoutMs ?? 20000);
+  const timeout = AbortSignal.timeout(options.timeoutMs ?? 60000);
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method: options.method ?? "GET",
