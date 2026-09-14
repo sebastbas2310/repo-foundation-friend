@@ -69,6 +69,7 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [role, setRole] = useState<Role>("VIEWER");
+  const [competitorType, setCompetitorType] = useState("NONE");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
