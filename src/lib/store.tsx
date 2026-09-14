@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 import { useAuth } from "./auth";
-import { api } from "./api";
+import { api, ApiError, friendlyMessage } from "./api";
 import { fetchRemoteSnapshot } from "./remote";
 import type {
   AuditLog,
@@ -99,12 +100,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<StoreValue>(() => {
-    /** Best-effort write-through to the racing server; the local update always stands. */
+    /** Best-effort write-through to the racing server; failures surface as a toast. */
     const persist = (action: () => Promise<unknown>) => {
       if (!live) return;
       void action()
         .then(() => refresh())
-        .catch(() => undefined);
+        .catch((error) => toast.error(friendlyMessage(error)));
     };
 
     return {
@@ -113,15 +114,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       live,
       refresh,
       saveCompetitor: (input) => {
-        persist(() =>
-          input.id
-            ? api.users.update(input.id, { fullName: input.name, role: "VIEWER" })
-            : api.users.create({
+        persist(() => {
+          // The backend stores age as a birth date; approximate it from the form's age.
+          const dateOfBirth = new Date(
+            Date.UTC(new Date().getUTCFullYear() - input.age, 0, 1),
+          ).toISOString();
+          const body = {
+            name: input.name,
+            nickname: input.nickname,
+            type: input.type,
+            dateOfBirth,
+            weight: input.weight,
+            height: input.height,
+            origin: input.country,
+            status: input.status,
+            // The record is tied to the email of whoever registers it.
+            registeredByEmail: user?.username ?? "",
+            email: user?.username ?? "",
+          };
+          if (input.id) return api.competitors.update(input.id, body);
+          // Backends without the competitors controller (404) still accept the
+          // registration through /users, keyed by the registering user's email.
+          return api.competitors.create(body).catch((error) => {
+            if (error instanceof ApiError && error.status === 404) {
+              return api.users.create({
                 fullName: input.name,
-                email: `${input.name.toLowerCase().replace(/[^a-z0-9]+/g, ".")}@eia.race`,
+                email: body.email,
                 role: "VIEWER",
-              }),
-        );
+              });
+            }
+            throw error;
+          });
+        });
         setState((prev) => {
           if (input.id) {
             return {
@@ -142,6 +166,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         });
       },
       deactivateCompetitor: (id) => {
+        persist(() => api.competitors.setStatus(id, "RETIRED"));
         setState((prev) => ({
           ...prev,
           competitors: prev.competitors.map((c) =>
@@ -313,7 +338,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         });
       },
     };
-  }, [state, loading, log, live, refresh]);
+  }, [state, loading, log, live, refresh, user]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
