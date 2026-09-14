@@ -52,7 +52,7 @@ export function AppShell({
   subtitle?: string | undefined;
   actions?: ReactNode | undefined;
 }) {
-  const { user, ready, logout, offline } = useAuth();
+  const { user, ready, logout } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
@@ -121,13 +121,6 @@ export function AppShell({
             );
           })}
         </nav>
-        <div className="p-4">
-          {offline ? (
-            <p className="rounded-lg bg-sidebar-accent p-3 text-xs text-sidebar-foreground/70">
-              Demo mode — the API at localhost:8080 isn't responding, so sample data is shown.
-            </p>
-          ) : null}
-        </div>
       </aside>
 
       {open ? (

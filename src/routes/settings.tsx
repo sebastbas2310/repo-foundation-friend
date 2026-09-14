@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api, friendlyMessage, unwrapPage, type ProfileResponse } from "@/lib/api";
+import { api, ApiError, friendlyMessage, unwrapPage, type ProfileResponse } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { labelize } from "@/lib/types";
@@ -90,10 +90,17 @@ function ProfileCard() {
 
   useEffect(() => {
     let active = true;
+    // GET /users/me is unreliable on the backend (400 even when the profile
+    // exists); POST /users/me is "create or return", so use it as the read.
     api
       .myProfile()
+      .catch((error) =>
+        error instanceof ApiError && (error.status === 400 || error.status === 404)
+          ? api.createProfile("")
+          : Promise.reject(error),
+      )
       .then((data) => {
-        if (!active) return;
+        if (!active || !data) return;
         setProfile(data);
         setFullName(data.fullName ?? "");
         setEmail(data.email ?? "");
