@@ -39,22 +39,20 @@ async function buildUser(session: Session): Promise<{ user: AuthUser; offline: b
     displayName: metadataName ?? email.split("@")[0] ?? email,
     role: "VIEWER",
   };
-  try {
-    let profile: ProfileResponse | undefined;
     try {
-      profile = await api.myProfile(session.access_token);
-    } catch (error) {
-      // The backend answers 400/404 when this Supabase identity has no profile
-      // row yet — auto-provision it and read it back.
-      if (error instanceof ApiError && (error.status === 400 || error.status === 404)) {
-        await api
-          .createProfile(fallback.displayName, session.access_token)
-          .catch(() => undefined);
+      let profile: ProfileResponse | undefined;
+      try {
         profile = await api.myProfile(session.access_token);
-      } else {
-        throw error;
+      } catch (error) {
+        // The backend's GET /users/me is unreliable (answers 400 even when the
+        // profile exists). POST /users/me is "create or return", so use its
+        // response directly as the profile read.
+        if (error instanceof ApiError && (error.status === 400 || error.status === 404)) {
+          profile = await api.createProfile(fallback.displayName, session.access_token);
+        } else {
+          throw error;
+        }
       }
-    }
     return {
       user: {
         username: profile.email ?? email,
