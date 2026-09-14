@@ -106,7 +106,7 @@ function mapTeam(row: Row): Team {
     name: str(row, "name", "teamName") || `Team #${num(row, "id")}`,
     coach: str(row, "coach", "coachName", "captainName", "manager"),
     strategy: str(row, "strategy", "description", "motto"),
-    memberIds: ids(row, "memberIds", "members", "users", "competitors"),
+    memberIds: ids(row, "memberIds", "competitorIds", "members", "users", "competitors"),
   };
 }
 
