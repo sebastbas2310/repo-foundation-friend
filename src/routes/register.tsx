@@ -75,7 +75,7 @@ function RegisterPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const parsed = schema.safeParse({ fullName, email, password, confirm, role });
+    const parsed = schema.safeParse({ fullName, email, password, confirm, role, competitorType });
     if (!parsed.success) {
       const next: FieldErrors = {};
       for (const issue of parsed.error.issues) {
