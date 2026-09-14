@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api, friendlyMessage, unwrapPage, type ProfileResponse } from "@/lib/api";
+import { api, ApiError, friendlyMessage, unwrapPage, type ProfileResponse } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { labelize } from "@/lib/types";
