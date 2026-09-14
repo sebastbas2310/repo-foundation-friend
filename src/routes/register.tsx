@@ -52,6 +52,7 @@ const schema = z
     password: z.string().min(8, "Use at least 8 characters").max(128),
     confirm: z.string().min(1, "Repeat your password"),
     role: z.enum(["ADMINISTRATOR", "RACE_ORGANIZER", "VIEWER"]),
+    competitorType: z.enum(["NONE", "CAMEL", "DWARF", "MEDIUM", "OTHER"]),
   })
   .refine((data) => data.password === data.confirm, {
     path: ["confirm"],
@@ -68,12 +69,13 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [role, setRole] = useState<Role>("VIEWER");
+  const [competitorType, setCompetitorType] = useState("NONE");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const parsed = schema.safeParse({ fullName, email, password, confirm, role });
+    const parsed = schema.safeParse({ fullName, email, password, confirm, role, competitorType });
     if (!parsed.success) {
       const next: FieldErrors = {};
       for (const issue of parsed.error.issues) {
@@ -86,7 +88,13 @@ function RegisterPage() {
     setErrors({});
     setSubmitting(true);
     try {
-      const result = await signUp(parsed.data.email, parsed.data.password, parsed.data.fullName);
+      const result = await signUp(
+        parsed.data.email,
+        parsed.data.password,
+        parsed.data.fullName,
+        parsed.data.role,
+        parsed.data.competitorType === "NONE" ? null : parsed.data.competitorType,
+      );
       if (result.needsEmailConfirmation) {
         toast.success("Check your inbox and confirm your email, then sign in.");
         navigate({ to: "/login", replace: true });
@@ -208,6 +216,25 @@ function RegisterPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="competitorType">Compete as</Label>
+                <Select value={competitorType} onValueChange={setCompetitorType}>
+                  <SelectTrigger id="competitorType">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NONE">I'm not competing</SelectItem>
+                    <SelectItem value="CAMEL">Camel</SelectItem>
+                    <SelectItem value="DWARF">Dwarf</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  We'll register you as a competitor with this email.
+                </p>
               </div>
 
               <Button type="submit" className="w-full" disabled={submitting}>
