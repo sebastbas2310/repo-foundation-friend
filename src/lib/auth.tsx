@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { api, setUnauthorizedHandler } from "./api";
+import { api, ApiError, setUnauthorizedHandler, type ProfileResponse } from "./api";
 import { supabase } from "./supabase";
 import type { AuthUser, Role } from "./types";
 
