@@ -142,6 +142,16 @@ export const api = {
       apiRequest<ProfileResponse>(`/users/${id}/status`, { method: "PATCH", body: { enabled } }),
     remove: (id: number) => apiRequest<void>(`/users/${id}`, { method: "DELETE" }),
   },
+  competitors: {
+    list: () => apiRequest(`/competitors${PAGE_QUERY}`),
+    get: (id: number) => apiRequest(`/competitors/${id}`),
+    create: (body: unknown) => apiRequest("/competitors", { method: "POST", body }),
+    update: (id: number, body: unknown) =>
+      apiRequest(`/competitors/${id}`, { method: "PUT", body }),
+    /** Logical delete on the backend: flips the competitor's status. */
+    setStatus: (id: number, status: string) =>
+      apiRequest(`/competitors/${id}/status`, { method: "PATCH", body: { status } }),
+  },
   teams: {
     list: () => apiRequest(`/teams${PAGE_QUERY}`),
     get: (id: number) => apiRequest(`/teams/${id}`),
