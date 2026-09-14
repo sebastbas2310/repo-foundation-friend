@@ -33,6 +33,8 @@ export interface Competitor {
   height: number;
   country: string;
   status: CompetitorStatus;
+  /** Email of the user who registered this competitor. */
+  registeredByEmail?: string | undefined;
   teamId?: number | null | undefined;
 }
 

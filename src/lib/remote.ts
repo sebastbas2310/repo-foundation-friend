@@ -52,6 +52,33 @@ const ids = (row: Row, ...keys: string[]) => {
   return [];
 };
 
+/** Years between an ISO date string and today; 0 when unparsable. */
+const ageFrom = (iso: string) => {
+  const born = new Date(iso);
+  if (Number.isNaN(born.getTime())) return 0;
+  const now = new Date();
+  let age = now.getUTCFullYear() - born.getUTCFullYear();
+  const beforeBirthday =
+    now.getUTCMonth() < born.getUTCMonth() ||
+    (now.getUTCMonth() === born.getUTCMonth() && now.getUTCDate() < born.getUTCDate());
+  if (beforeBirthday) age -= 1;
+  return age > 0 ? age : 0;
+};
+
+/** Maps the dedicated `/competitors` DTO (CompetitorResponse). */
+function mapCompetitor(row: Row): Competitor {
+  const mapped = mapUser(row);
+  const dateOfBirth = str(row, "dateOfBirth", "birthDate");
+  return {
+    ...mapped,
+    name: str(row, "name", "fullName") || mapped.name,
+    country: str(row, "origin", "country") || mapped.country,
+    age: num(row, "age") || ageFrom(dateOfBirth),
+    registeredByEmail:
+      str(row, "registeredByEmail", "email", "createdByEmail", "userEmail") || undefined,
+  };
+}
+
 function mapUser(row: Row): Competitor {
   const type = str(row, "participantType", "competitorType", "type").toUpperCase();
   const status = str(row, "status", "competitorStatus").toUpperCase();
@@ -151,7 +178,8 @@ export interface RemoteSnapshot {
 
 /** Loads everything the live API exposes today. Never throws. */
 export async function fetchRemoteSnapshot(): Promise<RemoteSnapshot> {
-  const [users, teams, races, registrations, results] = await Promise.allSettled([
+  const [competitors, users, teams, races, registrations, results] = await Promise.allSettled([
+    api.competitors.list(),
     api.users.list(),
     api.teams.list(),
     api.races.list(),
@@ -167,15 +195,20 @@ export async function fetchRemoteSnapshot(): Promise<RemoteSnapshot> {
       ? { ok: true, data: unwrapPage<Row>(settled.value).map(map) }
       : { ok: false, data: [] };
 
+  const c = rows(competitors, mapCompetitor);
   const u = rows(users, mapUser);
   const t = rows(teams, mapTeam);
   const r = rows(races, mapRace);
   const g = rows(registrations, mapRegistration);
   const s = rows(results, mapResult);
 
+  // Prefer the dedicated competitors endpoint; older backends without it still
+  // expose the roster through /users.
+  const roster = c.ok ? c.data : u.data;
+
   return {
-    reachable: [u, t, r, g, s].some((entry) => entry.ok),
-    competitors: u.data,
+    reachable: [c, u, t, r, g, s].some((entry) => entry.ok),
+    competitors: roster,
     teams: t.data,
     races: r.data,
     registrations: g.data,
