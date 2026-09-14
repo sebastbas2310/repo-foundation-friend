@@ -31,6 +31,12 @@ const NAV: { to: string; label: string; icon: typeof Flag; roles: Role[] }[] = [
   { to: "/standings", label: "Standings", icon: Trophy, roles: ["ADMINISTRATOR", "RACE_ORGANIZER", "VIEWER"] },
   { to: "/approvals", label: "Approvals", icon: ClipboardCheck, roles: ["ADMINISTRATOR", "RACE_ORGANIZER"] },
   { to: "/audit-logs", label: "Audit logs", icon: ScrollText, roles: ["ADMINISTRATOR"] },
+  {
+    to: "/settings",
+    label: "Configuración",
+    icon: Settings,
+    roles: ["ADMINISTRATOR", "RACE_ORGANIZER", "VIEWER"],
+  },
 ];
 
 export function AppShell({
