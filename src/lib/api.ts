@@ -127,8 +127,12 @@ export interface ProfileResponse {
 /** Thin, typed service layer mirroring the Spring Boot endpoints (`/api/v1`). */
 export const api = {
   /** Creates (or returns) the app profile linked to the Supabase identity. */
-  createProfile: (fullName: string, token?: string | null) =>
-    apiRequest<ProfileResponse>("/users/me", { method: "POST", body: { fullName }, token }),
+  createProfile: (fullName: string, token?: string | null, role?: string | null) =>
+    apiRequest<ProfileResponse>("/users/me", {
+      method: "POST",
+      body: role ? { fullName, role } : { fullName },
+      token,
+    }),
   /** Reads the app profile for the signed-in Supabase identity. */
   myProfile: (token?: string | null) => apiRequest<ProfileResponse>("/users/me", { token }),
   users: {
