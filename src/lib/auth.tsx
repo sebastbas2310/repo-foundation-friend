@@ -177,19 +177,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return built.user;
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
+  const signUp = useCallback(async (
+    email: string,
+    password: string,
+    fullName: string,
+    role: Role = "VIEWER",
+    competitorType?: string | null,
+  ) => {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          requested_role: role,
+          ...(competitorType ? { competitor_type: competitorType } : {}),
+        },
         ...(typeof window === "undefined" ? {} : { emailRedirectTo: window.location.origin }),
       },
     });
     if (error) throw new Error(error.message);
     // Without email confirmation Supabase returns a session right away; create the profile now.
     if (data.session) {
-      await api.createProfile(fullName, data.session.access_token).catch(() => undefined);
+      await api
+        .createProfile(fullName, data.session.access_token, toBackendRole(role))
+        .catch(() => api.createProfile(fullName, data.session!.access_token).catch(() => undefined));
       const built = await buildUser(data.session);
       setUser(built.user);
       setOffline(built.offline);
