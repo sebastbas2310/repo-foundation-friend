@@ -3,7 +3,13 @@ import { getAccessToken, supabase } from "./supabase";
 export const API_ORIGIN =
   (import.meta.env['VITE_API_BASE_URL'] as string | undefined) ?? "https://camelvsdwarf.onrender.com";
 
-export const API_BASE_URL = `${API_ORIGIN.replace(/\/$/, "")}/api/v1`;
+/**
+ * In the browser we go through the same-origin proxy (`/api/proxy/...`) because
+ * the course backend does not allow cross-origin calls. On the server we talk
+ * to the upstream directly.
+ */
+export const API_BASE_URL =
+  typeof window === "undefined" ? `${API_ORIGIN.replace(/\/$/, "")}/api/v1` : "/api/proxy";
 
 export class ApiError extends Error {
   status: number;
